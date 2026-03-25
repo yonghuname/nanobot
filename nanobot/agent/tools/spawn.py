@@ -54,8 +54,11 @@ class SpawnTool(Tool):
             "required": ["task"],
         }
 
-    async def execute(self, task: str, label: str | None = None, **kwargs: Any) -> str:
+    async def execute(self, task: str | None = None, label: str | None = None, **kwargs: Any) -> str:
         """Spawn a subagent to execute the given task."""
+        if not task or not task.strip():
+            return "Error: Task description cannot be empty"
+
         return await self._manager.spawn(
             task=task,
             label=label,

@@ -92,7 +92,10 @@ class WebSearchTool(Tool):
         self.config = config if config is not None else WebSearchConfig()
         self.proxy = proxy
 
-    async def execute(self, query: str, count: int | None = None, **kwargs: Any) -> str:
+    async def execute(self, query: str | None = None, count: int | None = None, **kwargs: Any) -> str:
+        if not query or not query.strip():
+            return "Error: Search query cannot be empty"
+
         provider = self.config.provider.strip().lower() or "brave"
         n = min(max(count or self.config.max_results, 1), 10)
 
@@ -180,7 +183,7 @@ class WebSearchTool(Tool):
             headers = {"Accept": "application/json", "Authorization": f"Bearer {api_key}"}
             async with httpx.AsyncClient(proxy=self.proxy) as client:
                 r = await client.get(
-                    f"https://s.jina.ai/",
+                    "https://s.jina.ai/",
                     params={"q": query},
                     headers=headers,
                     timeout=15.0,
@@ -234,7 +237,10 @@ class WebFetchTool(Tool):
         self.max_chars = max_chars
         self.proxy = proxy
 
-    async def execute(self, url: str, extractMode: str = "markdown", maxChars: int | None = None, **kwargs: Any) -> Any:
+    async def execute(self, url: str | None = None, extractMode: str = "markdown", maxChars: int | None = None, **kwargs: Any) -> Any:  # noqa: N803
+        if not url:
+            return json.dumps({"error": "URL parameter is required", "url": url}, ensure_ascii=False)
+
         max_chars = maxChars or self.max_chars
         is_valid, error_msg = _validate_url_safe(url)
         if not is_valid:
